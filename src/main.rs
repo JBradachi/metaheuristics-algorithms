@@ -7,12 +7,10 @@ use std::time::Instant;
 fn main() {
     println!("zorza é paia");
 
-    f1(5.0, 4.0);
-    
-    println!("{}", f2(5.0, 5.0, 5.0, 5.0));
-    
-    let solucao_inicialf1 = gera_solucao_inicial(f1, 0.0, 100.0);
+    let mut solucao_inicialf1:Solucao = Solucao::default();
+    solucao_inicialf1.gera_solucao_inicial(f1, 0.0, 24.0);
 
+    solucao_inicialf1.mostra_solucao();
 }
 
 // Funções objetivo
@@ -58,24 +56,36 @@ fn bvns(solucao_inicial: Solucao, vizinhanca_max: u64, tempo_max: u64){
 }
 
 // Estruturas auxiliares
+
+#[derive(Clone, Default)]
 struct Solucao{
     variaveis: Vec<f64>,
     resultado: f64,
 }
 
-// Funções auxiliares (TODO: deixar genérico) 
+impl Solucao {
+    fn mostra_solucao(&self){
+        print!("Variaveis: ");
+        for x in self.variaveis.iter(){
+            print!("{} ", x);
+        }
+        println!("\nResultado: {}", &self.resultado);
+    }
 
-fn gera_solucao_inicial(f: fn(f64, f64) -> f64, xmin: f64, xmax: f64) -> Solucao {
-    let x1 = rand::thread_rng().gen_range(xmin, xmax);
-    let x2 = rand::thread_rng().gen_range(xmin, xmax);
-    let x = Solucao {
-        variaveis: vec![x1, x2],
-        resultado: f(x1, x2),
-    };
-    x
+    // uma solução para abordar os dois tipos de solução é fazer sobrecarga
+    // rust nn aceita sobrecarga obosta
+    fn gera_solucao_inicial(&mut self, f: fn(f64, f64) -> f64, xmin: f64, xmax: f64) {
+        let x1 = rand::thread_rng().gen_range(xmin, xmax);
+        let x2 = rand::thread_rng().gen_range(xmin, xmax);
+
+        self.variaveis = vec![x1, x2];
+        self.resultado = f(x1, x2);
+    }
 }
 
-fn varia_bvns(sol_otima: Solucao, vizinhanca:u64) -> Solucao {
+// Funções auxiliares (TODO: deixar genérico) 
+
+fn varia_bvns(sol_otima: Solucao, vizinhanca: &mut u64) -> Solucao {
     // TODO: fazer função de variação
     sol_otima
 }
