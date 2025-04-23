@@ -1,5 +1,6 @@
 mod solucao;
 mod bvns;
+mod sa;
 extern crate rand;
 
 use std::f64::consts::PI;
