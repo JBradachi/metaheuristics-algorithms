@@ -14,6 +14,7 @@ fn main() {
     
     let res = bvns::bvns(solucao_inicialf1, 12, 5);
     res.mostra_solucao();
+    println!("{}", sa::gera_crtl_inicial(10, 0.0, 24.0, f1));
 }
 
 // Funções objetivo
