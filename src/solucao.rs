@@ -1,35 +1,23 @@
-extern crate rand;
-
 use rand::Rng;
+use super::ObjetivoFn;
 
-#[derive(Clone, Default)]
-pub struct Solucao{
+#[derive(Clone, Debug)]
+pub struct Solucao {
     pub variaveis: Vec<f64>,
     pub resultado: f64,
 }
 
 impl Solucao {
-    pub fn mostra_solucao(&self){
-        print!("Variaveis: ");
-        for x in self.variaveis.iter(){
-            print!("{} ", x);
+    pub fn random(f: ObjetivoFn, min: f64, max: f64) -> Self {
+        let mut variaveis = Vec::new();
+        for _ in 0..f.num_vars {
+            let x = rand::thread_rng().gen_range(min, max);
+            variaveis.push(x);
         }
-        println!("\nResultado: {}", &self.resultado);
-    }
-
-    // uma solução para abordar os dois tipos de solução é fazer sobrecarga
-    // rust nn aceita sobrecarga obosta
-    pub fn gera_solucao_inicial(f: fn(f64, f64) -> f64, xmin: f64, xmax: f64) -> Solucao {
-        
-        let x1 = rand::thread_rng().gen_range(xmin, xmax);
-        let x2 = rand::thread_rng().gen_range(xmin, xmax);
-
-        let x: Solucao = Solucao { 
-            variaveis: vec![x1, x2], 
-            resultado: f(x1, x2), 
-        };
-        x
+        let resultado = f.call(&variaveis);
+        Solucao {
+            variaveis,
+            resultado,
+        }
     }
 }
-
-
