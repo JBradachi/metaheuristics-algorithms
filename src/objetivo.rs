@@ -5,6 +5,7 @@
 // encapsula um ponteiro para função com o número de variáveis que a função
 // espera dentro do vetor
 
+use core::f64;
 use std::f64::consts::PI;
 
 fn f1(x: &Vec<f64>) -> f64 {
@@ -27,6 +28,12 @@ fn f2(x: &Vec<f64>) -> f64 {
         + 19.8 * (x2 - 1.0) * (x4 - 1.0)
 }
 
+fn f3(x: &Vec<f64>) -> f64{
+    let x1 = x[0];
+    let x2 = x[1];
+    (x1+2.0)*(x1+2.0) + (x2+2.0)*(x2+2.0) 
+}
+
 #[derive(Clone, Copy)]
 pub struct ObjetivoFn {
     pub f: fn(&Vec<f64>) -> f64,
@@ -36,6 +43,10 @@ pub struct ObjetivoFn {
 impl ObjetivoFn {
     pub fn f1() -> Self {
         ObjetivoFn { f: f1, num_vars: 2 }
+    }
+
+    pub fn f3() -> Self {
+        ObjetivoFn { f: f3, num_vars: 2 }
     }
 
     pub fn f2() -> Self {

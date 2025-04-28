@@ -8,10 +8,10 @@ pub struct Solucao {
 }
 
 impl Solucao {
-    pub fn random(f: ObjetivoFn, min: f64, max: f64) -> Self {
+    pub fn random(f: ObjetivoFn, espaco_busca: (f64, f64)) -> Self {
         let mut variaveis = Vec::new();
         for _ in 0..f.num_vars {
-            let x = rand::thread_rng().gen_range(min, max);
+            let x = rand::thread_rng().gen_range(espaco_busca.0, espaco_busca.1);
             variaveis.push(x);
         }
         let resultado = f.call(&variaveis);
