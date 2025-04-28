@@ -4,7 +4,9 @@ use rand::Rng;
 use crate::ObjetivoFn;
 use std::f64::consts::PI;
 
-pub fn bvns(solucao_inicial: &Solucao, vizinhanca_max: u64, mut tempo_max: u128) -> Solucao {
+pub fn bvns(solucao_inicial: &Solucao, vizinhanca_max: u64, mut tempo_max: u128, 
+            espaco_busca: (f64, f64), fo: ObjetivoFn) -> Solucao {
+
     let mut tempo: u128 = 0;
     // TODO: Conferir onde é o melhor lugar para se deixar essa variavel
     let tamanho_passo = 1.0; // é o raio que será variado entre cada vizinhanca
@@ -59,7 +61,7 @@ fn varia_solucao(sol_otima:&Solucao, vizinhanca: &Vizinhanca) -> Solucao {
 }
 
 /// Local Search
-fn intensifica_bvns(sol_candidata: Solucao) -> Solucao {
+fn intensifica_solucao(sol_candidata: Solucao) -> Solucao {
     // TODO: fazer o hill climb
     sol_candidata
 }
