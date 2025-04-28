@@ -20,4 +20,9 @@ impl Solucao {
             resultado,
         }
     }
+    pub fn evaluate(f: ObjetivoFn, x: &Vec<f64>) -> Self {
+        let variaveis = x.clone();
+        let resultado = f.call(&x);
+        Solucao { variaveis, resultado }
+    }
 }
