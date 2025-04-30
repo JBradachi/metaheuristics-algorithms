@@ -11,37 +11,31 @@ pub fn bvns(solucao_inicial: &Solucao, vizinhanca_max: u64, mut tempo_max: u128,
     let mut tempo: u128 = 0;
     // TODO: Conferir onde é o melhor lugar para se deixar essa variavel
     let tamanho_passo = 1.0; // é o raio que será variado entre cada vizinhanca
+    print!("SOLUCAO INICIAL: {:?}\n", solucao_inicial);
 
     // transforma segundos em ns para fazer a contagem de tempo
     tempo_max = tempo_max * 36000000;
 
     // Cria estrutura de vizinhancas
-    let mut v: Vizinhanca = Vizinhanca::new(vizinhanca_max, tamanho_passo);
-    Vizinhanca::print_raio(&v);
-    //print!("Vizinhanca: {:?}\n", v);
-
-    let new_sol = v.gera_vizinho_aleatorio(solucao_inicial);
-    //print!("New Sol: {:?}\n", new_sol);
+    let mut v: Vizinhanca = Vizinhanca::new(fo, vizinhanca_max, tamanho_passo);
 
     let mut solucao_atual = solucao_inicial.clone();
 
     while tempo < tempo_max {
-        // Vizinhanca::reset_vizinhanca(&mut v); // seta vizinhanca para maior raio
         v.reset_estrutura_vizinhanca(); // seta vizinhanca para maior raio
 
         let start = Instant::now();
-        //print!("==============================================================");
 
         while !v.estruturas_totalmente_exploradas() {
-            //print!("\n");
-            //print!("--------------\n");
-            //print!("Vizinhanca: {:?}\n", v);
 
+            //print!("\n-----------------------\n");
             // gera solução candidata com variação Shake(sol_otima, vizinhanca)
-            let sol_candidata: Solucao = varia_solucao(&solucao_atual, &v);
+            let sol_candidata: Solucao = varia_solucao(&solucao_atual, &espaco_busca, &v);
+            //print!("Solucao variada: {:?}\n", sol_candidata);
 
             // faz uma busca local nessa solução candidata
             let sol_candidata_melhorada:Solucao = intensifica_solucao(sol_candidata, espaco_busca, fo);
+            // print!("Solucao intensificada: {:?}\n", sol_candidata_melhorada);
 
             // faz a mudança de vizinhança
             // A funcao já se responsabiliza por alterar os valores das solucoes candidatas e atualizar a vizinnhanca
@@ -55,9 +49,8 @@ pub fn bvns(solucao_inicial: &Solucao, vizinhanca_max: u64, mut tempo_max: u128,
 }
 
 /// Shake
-fn varia_solucao(sol_otima:&Solucao, vizinhanca: &Vizinhanca) -> Solucao {
-    // TODO: fazer função de variação
-    let solucao_variada = vizinhanca.gera_vizinho_aleatorio(sol_otima);
+fn varia_solucao(sol_otima:&Solucao, espaco_busca: &(f64, f64),  vizinhanca: &Vizinhanca) -> Solucao {
+    let solucao_variada = vizinhanca.gera_vizinho_aleatorio(sol_otima, &espaco_busca);
     solucao_variada
 }
 
@@ -68,36 +61,27 @@ fn intensifica_solucao(sol_candidata: Solucao, espaco_busca: (f64, f64), fo: Obj
 
 fn muda_vizinhanca( sol_atual: &mut Solucao, sol_candidata: &Solucao, vizinhanca: &mut Vizinhanca,) {
     // TODO: muda vizinhanca
-    let resultado_x_atual = Solucao::evaluate(ObjetivoFn::f1(), &sol_atual.variaveis);
-    let resultado_x_canditato = Solucao::evaluate(ObjetivoFn::f1(), &sol_candidata.variaveis);
-    //print!("---Sol atual {:?} \n", sol_atual);
-    //print!("---Sol candidata {:?} \n", sol_candidata);
-    //print!("---Sol atual (r) {:?} \n", resultado_x_atual.resultado);
-    //print!("---Sol candidata (r) {:?} \n", resultado_x_canditato.resultado);
+    let resultado_x_atual = Solucao::evaluate(vizinhanca.funcao_objetivo, &sol_atual.variaveis);
+    let resultado_x_canditato = Solucao::evaluate(vizinhanca.funcao_objetivo, &sol_candidata.variaveis);
 
     if resultado_x_canditato.resultado < resultado_x_atual.resultado {
-        //print!("- Nova solucao otima\n");
+        // Atualiza solucao otima
         vizinhanca.reset_estrutura_vizinhanca();
         *sol_atual = sol_candidata.clone();
     }
     else {
-        //print!("- Atualiza a vizinhanca\n");
         vizinhanca.atualiza_estrutura_vizinhanca();
     }
 }
 
-#[derive(Clone, Debug)]
 pub struct Vizinhanca {
+    pub funcao_objetivo: ObjetivoFn,
     pub tot_vizinhancas: u64, // diz o total de vizinhancas a serem visitadas
     pub passo_vizinhanca: f64, // diz a distancia do raio entre cada vizinhanca
     pub vizinhanca_atual: f64, // raio da vizinhanca atual
 }
 
 impl Vizinhanca {
-    // DESCOMENTAR CASO VA USAR (pode ser que não use, ai só apaga)
-    // pub fn set_tot_vizinhanca(&mut self, n: u64) {
-    //     self.tot_vizinhancas = n;
-    // }
     pub fn reset_estrutura_vizinhanca(&mut self) {
         self.vizinhanca_atual = self.tot_vizinhancas as f64 * self.passo_vizinhanca;
     }
@@ -110,30 +94,43 @@ impl Vizinhanca {
             self.vizinhanca_atual = 0.0
         }
     }
-    pub fn new(tot_vizinhancas: u64, passo_vizinhanca: f64 ) -> Self {
+    pub fn new(funcao_objetivo: ObjetivoFn, tot_vizinhancas: u64, passo_vizinhanca: f64) -> Self {
         let vizinhanca_atual = tot_vizinhancas as f64 * passo_vizinhanca;
-        Vizinhanca { tot_vizinhancas, passo_vizinhanca, vizinhanca_atual}
+        Vizinhanca { funcao_objetivo, tot_vizinhancas, passo_vizinhanca, vizinhanca_atual}
     }
     pub fn print_raio(&self) {
         //print!("Raio da vizinhanca atual: {}\n", self.vizinhanca_atual);
     }
-    pub fn gera_vizinho_aleatorio(&self, solucao:&Solucao) -> Solucao {
+    pub fn gera_vizinho_aleatorio(&self, solucao:&Solucao, espaco_busca: &(f64, f64)) -> Solucao {
         let mut variaveis : Vec<f64>= Vec::new();
         variaveis.resize(2, 0.0);
         let x = solucao.variaveis[0];
         let y = solucao.variaveis[1];
+        let lim_min = espaco_busca.0;
+        let lim_max = espaco_busca.1;
 
         // As funcoes trigonometricas de rust usam radianos
         let rand: f64 = rand::thread_rng().gen_range(0.0, 2.0*PI);
 
-        //print!("Valor do angulo (viz): {}\n", rand);
         variaveis[0] = x + self.vizinhanca_atual * rand.cos();
         variaveis[1] = y + self.vizinhanca_atual * rand.sin();
+
+        // Verificacao de se não saiu do espaco de busca
+        while variaveis[0] > lim_max || variaveis[0] < lim_min {
+            print!("Variaveis fora do espaco busca!!! = {} {}\n", variaveis[0], variaveis[1]);
+            let rand: f64 = rand::thread_rng().gen_range(0.0, 2.0*PI);
+            variaveis[0] = x + self.vizinhanca_atual * rand.cos();
+        }
+        while variaveis[1] > lim_max || variaveis[1] < lim_min {
+            print!("Variaveis fora do espaco de busca!!! = {} {}\n", variaveis[0], variaveis[1]);
+            let rand: f64 = rand::thread_rng().gen_range(0.0, 2.0*PI);
+            variaveis[1] = x + self.vizinhanca_atual * rand.cos();
+        }
+        //print!("Gerando novos valores: {} {}\n", variaveis[0], variaveis[1]);
         
-        let new_resultado= Solucao::evaluate(ObjetivoFn::f1(),&variaveis);
+        let new_resultado= Solucao::evaluate(self.funcao_objetivo,&variaveis);
         new_resultado 
     }
-    // pub fn calcula_vizinhanca(solucao: Solucao) -> &mut Self {}
 }
 
 // Teoria dos calculos
