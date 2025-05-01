@@ -35,7 +35,7 @@ pub fn bvns(solucao_inicial: &Solucao, vizinhanca_max: u64, mut tempo_max: u128,
 
             // faz uma busca local nessa solução candidata
             let sol_candidata_melhorada:Solucao = intensifica_solucao(sol_candidata, espaco_busca, fo);
-            // print!("Solucao intensificada: {:?}\n", sol_candidata_melhorada);
+            print!("Solucao intensificada: {:?}\n", sol_candidata_melhorada);
 
             // faz a mudança de vizinhança
             // A funcao já se responsabiliza por alterar os valores das solucoes candidatas e atualizar a vizinnhanca
@@ -98,33 +98,55 @@ impl Vizinhanca {
         let vizinhanca_atual = tot_vizinhancas as f64 * passo_vizinhanca;
         Vizinhanca { funcao_objetivo, tot_vizinhancas, passo_vizinhanca, vizinhanca_atual}
     }
-    pub fn print_raio(&self) {
-        //print!("Raio da vizinhanca atual: {}\n", self.vizinhanca_atual);
-    }
+    // pub fn create_var_circle(&self) -> Solucao {
+    //     let v = Vec::new();
+    //     v.resize(2);
+    //     print!();
+    //     //print!("Raio da vizinhanca atual: {}\n", self.vizinhanca_atual);
+    // }
     pub fn gera_vizinho_aleatorio(&self, solucao:&Solucao, espaco_busca: &(f64, f64)) -> Solucao {
         let mut variaveis : Vec<f64>= Vec::new();
-        variaveis.resize(2, 0.0);
-        let x = solucao.variaveis[0];
-        let y = solucao.variaveis[1];
         let lim_min = espaco_busca.0;
         let lim_max = espaco_busca.1;
 
-        // As funcoes trigonometricas de rust usam radianos
-        let rand: f64 = rand::thread_rng().gen_range(0.0, 2.0*PI);
+        let size = solucao.variaveis.len();
 
-        variaveis[0] = x + self.vizinhanca_atual * rand.cos();
-        variaveis[1] = y + self.vizinhanca_atual * rand.sin();
+        variaveis.resize(size, 0.0);
+        // print!("-----------------\n");
 
-        // Verificacao de se não saiu do espaco de busca
-        while variaveis[0] > lim_max || variaveis[0] < lim_min {
-            print!("Variaveis fora do espaco busca!!! = {} {}\n", variaveis[0], variaveis[1]);
-            let rand: f64 = rand::thread_rng().gen_range(0.0, 2.0*PI);
-            variaveis[0] = x + self.vizinhanca_atual * rand.cos();
+        let mut na_caixa = false; // Logica muito complexa pra explicar no código sem nenhuma imagem. Mas é muito foda (fiquei legitimamente orgulhoso)
+        for elemen in variaveis.iter_mut(){
+            loop {
+                let variacao = rand::thread_rng().gen_range(0.0, self.vizinhanca_atual);
+                let neg_or_pos = rand::thread_rng().gen_range(-1.0,1.0);
+
+                if neg_or_pos <= 0.0 {
+                    *elemen = *elemen + variacao;
+                    if lim_min <= *elemen && *elemen <= lim_max {
+                        if -self.vizinhanca_atual + self.passo_vizinhanca <= *elemen || *elemen >= self.vizinhanca_atual - self.passo_vizinhanca {na_caixa = true};
+                        // print!("elemen neg{:?}\n", *elemen);
+                        break;
+                    }
+                } else {
+                    *elemen = *elemen + self.vizinhanca_atual - variacao;
+                    if lim_min <= *elemen && *elemen <= lim_max {
+                        if -self.vizinhanca_atual + self.passo_vizinhanca <= *elemen || *elemen >= self.vizinhanca_atual - self.passo_vizinhanca {na_caixa = true};
+                        // print!("elemen pos{:?}\n", *elemen);
+                        break;
+                    }
+                }
+            }
         }
-        while variaveis[1] > lim_max || variaveis[1] < lim_min {
-            print!("Variaveis fora do espaco de busca!!! = {} {}\n", variaveis[0], variaveis[1]);
-            let rand: f64 = rand::thread_rng().gen_range(0.0, 2.0*PI);
-            variaveis[1] = x + self.vizinhanca_atual * rand.cos();
+        if !na_caixa { // Pulo do gato.
+            let var = rand::thread_rng().gen_range(0,size);
+            let variacao = rand::thread_rng().gen_range(self.vizinhanca_atual - self.passo_vizinhanca, self.vizinhanca_atual);
+            let neg_or_pos = rand::thread_rng().gen_range(-1.0,1.0);
+
+            if neg_or_pos <= 0.0 {
+                variaveis[var] = -variacao;
+            } else {
+                variaveis[var] = variacao;
+            }
         }
         //print!("Gerando novos valores: {} {}\n", variaveis[0], variaveis[1]);
         
