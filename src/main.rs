@@ -1,7 +1,7 @@
-mod bvns;
 mod annealing;
 mod hillclimb;
 mod solucao;
+mod bvns;
 mod objetivo;
 
 use bvns::bvns;
@@ -21,4 +21,8 @@ fn main() {
     //let res = bvns::bvns(&solucao_inicialf1, 12, 5);
     //println!("{:?}", res);
     //println!("{}", annealing::temperatura_inicial(10, ObjetivoFn::f1(), 0.0, 24.0));
+    println!(
+        "{:?}",
+        annealing::simulated_annealing(ObjetivoFn::f1(), -100.0, 100.0)
+    );
 }
