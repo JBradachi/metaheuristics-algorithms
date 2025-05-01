@@ -11,7 +11,7 @@ use crate::{ObjetivoFn, Solucao};
 const LN_E0: f64 = -0.22314355131; // mágico. Não toque
 
 fn temperatura_inicial(perturb: u32, f: ObjetivoFn, min: f64, max: f64) -> f64 {
-    // Calcula ΔE⁺
+    // Calcula ΔE+
     let mut res: f64 = 0.0;
     let mut anterior = Solucao::random(f, min, max);
     for _ in 0..perturb {
@@ -19,7 +19,7 @@ fn temperatura_inicial(perturb: u32, f: ObjetivoFn, min: f64, max: f64) -> f64 {
         res += (anterior.resultado - atual.resultado).abs();
         anterior = atual;
     }
-    // Fórmula: T0 = - ΔE⁺ / ln (ξ0)
+    // Fórmula: T0 = - ΔE+ / ln (ξ0)
     -(res / (perturb as f64)) / LN_E0
 }
 
@@ -33,7 +33,7 @@ const TEMP_FATOR: f64 = 0.9;
 pub fn simulated_annealing(f: ObjetivoFn, min: f64, max: f64) -> Solucao {
     let mut s = Solucao::random(f, min, max); // solução atual
     let mut best_solution = s.clone(); // melhor solução encontrada
-    let mut num_iters = 2; // número de iterações por temperatura
+    let mut num_iters = 10000; // número de iterações por temperatura
     let mut temperatura = temperatura_inicial(10, f, min, max);
 
     // Uma temperatura muito baixa sinaliza o fim do algoritmo
@@ -49,7 +49,7 @@ pub fn simulated_annealing(f: ObjetivoFn, min: f64, max: f64) -> Solucao {
             }
         }
         temperatura *= TEMP_FATOR;
-        num_iters += 1;
+        num_iters += 100;
     }
     best_solution
 }

@@ -7,8 +7,8 @@ pub struct Solucao {
     pub resultado: f64,
 }
 
-// Porcentagem de variação em cada atributo em uma perturbação
-const SHAKE_PERCENT: f64 = 0.05;
+// Probabilidade de perturbar cada atributo
+const P_NOISE: f64 = 0.5;
 
 impl Solucao {
     pub fn new(f: ObjetivoFn, variaveis: Vec<f64>) -> Self {
@@ -33,14 +33,20 @@ impl Solucao {
     }
 
     pub fn shake(&self, f: ObjetivoFn, min: f64, max: f64) -> Solucao {
+        let noise = (min.abs() + max.abs()) / 100.0;
+
         let mut variaveis = self.variaveis.clone();
-        for x in variaveis.iter_mut() {
-            let p = rand::thread_rng().gen_range(-SHAKE_PERCENT, SHAKE_PERCENT);
-            *x *= 1.0 + p;
-            if *x > max {
-                *x = max;
-            } else if *x < min {
-                *x = min;
+        for elem in variaveis.iter_mut() {
+            if P_NOISE >= rand::thread_rng().gen_range(0.0, 1.0) {
+                // Devemos perturbar esse atributo dentro dos limites
+                loop {
+                    let delta = rand::thread_rng().gen_range(-noise, noise);
+                    let m = *elem + delta;
+                    if m <= max && m >= min {
+                        *elem = m;
+                        break;
+                    }
+                }
             }
         }
         Solucao::new(f, variaveis)
