@@ -10,7 +10,7 @@ use objetivo::ObjetivoFn;
 
 fn main() {
     let espaco_busca = (-100.0, 100.0);
-    let objetivo = ObjetivoFn::f1();
+    let objetivo = ObjetivoFn::f2();
     let solucao_inicial = Solucao::random(objetivo, espaco_busca);
     println!("{:?}", solucao_inicial);
 
