@@ -28,25 +28,53 @@ fn main() {
 const N: i32 = 30;
 
 fn imprime_algoritmos(obj: ObjetivoFn, n: i32, esp: EspacoBusca, ch: char) {
+    let mut first = true;
+    let mut melhor_resultado: f64 = 0.0;
+    let mut melhor_variaveis: Vec<f64> = Vec::new();
+
     println!("Para f{} com o espaço de busca {}", n, ch);
     println!("HC:");
     for _ in 0..N {
         let res = hillclimb::hillclimb_puro(obj, esp);
+        if first || res.resultado < melhor_resultado {
+            first = false;
+            melhor_resultado = res.resultado;
+            melhor_variaveis = res.variaveis.clone();
+        }
         println!("{}", res.resultado);
     }
-    println!();
+    println!("\nMelhor resultado: {}, produzido com as variáveis {:?}\n",
+        melhor_resultado, melhor_variaveis);
 
+    first = true;
+    melhor_resultado = 0.0;
+    melhor_variaveis = Vec::new();
     println!("BVNS:");
     for _ in 0..N {
         let res = bvns::bvns(12, 20, esp, obj);
+        if first || res.resultado < melhor_resultado {
+            first = false;
+            melhor_resultado = res.resultado;
+            melhor_variaveis = res.variaveis.clone();
+        }
         println!("{}", res.resultado);
     }
-    println!();
+    println!("\nMelhor resultado: {}, produzido com as variáveis {:?}\n",
+        melhor_resultado, melhor_variaveis);
 
+    first = true;
+    melhor_resultado = 0.0;
+    melhor_variaveis = Vec::new();
     println!("SA:");
     for _ in 0..N {
         let res = annealing::simulated_annealing(obj, esp);
+        if first || res.resultado < melhor_resultado {
+            first = false;
+            melhor_resultado = res.resultado;
+            melhor_variaveis = res.variaveis.clone();
+        }
         println!("{}", res.resultado);
     }
-    println!();
+    println!("\nMelhor resultado: {}, produzido com as variáveis {:?}\n",
+        melhor_resultado, melhor_variaveis);
 }
