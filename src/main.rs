@@ -10,10 +10,11 @@ use objetivo::ObjetivoFn;
 
 fn main() {
     let espaco_busca = (-100.0, 100.0);
-    let solucao_inicial = Solucao::random(ObjetivoFn::f5(), espaco_busca);
+    let objetivo = ObjetivoFn::f1();
+    let solucao_inicial = Solucao::random(objetivo, espaco_busca);
     println!("{:?}", solucao_inicial);
 
-    let solucao_otima = bvns(&solucao_inicial, 12, 10, espaco_busca, ObjetivoFn::f5());
+    let solucao_otima = bvns(&solucao_inicial, 12, 20, espaco_busca, objetivo);
 
     println!("{:?}", solucao_otima);
 
