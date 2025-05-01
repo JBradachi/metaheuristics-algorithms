@@ -1,15 +1,12 @@
-mod annealing;
-mod hillclimb;
-mod solucao;
-mod bvns;
-mod objetivo;
-
-use bvns::bvns;
-use solucao::Solucao;
-use objetivo::ObjetivoFn;
+use metaheuristics::{
+    annealing,
+    bvns::bvns,
+    objetivo::ObjetivoFn,
+    solucao::{EspacoBusca, Solucao},
+};
 
 fn main() {
-    let espaco_busca = (-100.0, 100.0);
+    let espaco_busca = EspacoBusca::new(-100.0, 100.0);
     let objetivo = ObjetivoFn::f1();
     let solucao_inicial = Solucao::random(objetivo, espaco_busca);
     println!("{:?}", solucao_inicial);
@@ -17,12 +14,8 @@ fn main() {
     let solucao_otima = bvns(&solucao_inicial, 12, 20, espaco_busca, objetivo);
 
     println!("{:?}", solucao_otima);
-
-    //let res = bvns::bvns(&solucao_inicialf1, 12, 5);
-    //println!("{:?}", res);
-    //println!("{}", annealing::temperatura_inicial(10, ObjetivoFn::f1(), 0.0, 24.0));
     println!(
         "{:?}",
-        annealing::simulated_annealing(ObjetivoFn::f1(), -100.0, 100.0)
+        annealing::simulated_annealing(ObjetivoFn::f1(), espaco_busca)
     );
 }

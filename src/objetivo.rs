@@ -29,32 +29,31 @@ fn f2(x: &Vec<f64>) -> f64 {
 }
 
 // Funcao concava (ver imagens)
-fn f3(x: &Vec<f64>) -> f64{
+fn f3(x: &Vec<f64>) -> f64 {
     let x1 = x[0];
     let x2 = x[1];
-    (x1+2.0)*(x1+2.0) + (x2+2.0)*(x2+2.0) 
+    (x1 + 2.0) * (x1 + 2.0) + (x2 + 2.0) * (x2 + 2.0)
 }
 
 // Regiao de pingo d´agua (ver imagens)
-fn f4(x: &Vec<f64>) -> f64{
+fn f4(x: &Vec<f64>) -> f64 {
     let x1 = x[0];
     let x2 = x[1];
-    let raio = ((x1*x1) + (x2*x2)).sqrt();
-    let numerador = 2.0*(5.0+raio).sin();
-    let denominador = 1.0 + raio/10.0;
-    numerador/denominador
+    let raio = ((x1 * x1) + (x2 * x2)).sqrt();
+    let numerador = 2.0 * (5.0 + raio).sin();
+    let denominador = 1.0 + raio / 10.0;
+    numerador / denominador
 }
 // Regiao sen_cos (ver imagens)
-fn f5(x: &Vec<f64>) -> f64{
+fn f5(x: &Vec<f64>) -> f64 {
     let x1 = x[0];
     let x2 = x[1];
-    let expr1 = (2.0*x1).sin()/x1;
-    let expr2 = (2.0*x2).sin()/x2;
-    let raio = ((x1*x1) + (x2*x2)).sqrt();
-    let den = 1.0 + raio/5.0;
-    (-expr1-expr2)/den
+    let expr1 = (2.0 * x1).sin() / x1;
+    let expr2 = (2.0 * x2).sin() / x2;
+    let raio = ((x1 * x1) + (x2 * x2)).sqrt();
+    let den = 1.0 + raio / 5.0;
+    (-expr1 - expr2) / den
 }
-
 
 #[derive(Clone, Copy)]
 pub struct ObjetivoFn {

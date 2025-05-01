@@ -1,5 +1,17 @@
-use super::ObjetivoFn;
+use crate::objetivo::ObjetivoFn;
 use rand::Rng;
+
+#[derive(Clone, Copy)]
+pub struct EspacoBusca {
+    pub min: f64,
+    pub max: f64,
+}
+
+impl EspacoBusca {
+    pub fn new(min: f64, max: f64) -> Self {
+        EspacoBusca { min, max }
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Solucao {
@@ -19,10 +31,10 @@ impl Solucao {
         }
     }
 
-    pub fn random(f: ObjetivoFn, espaco_busca: (f64, f64)) -> Self {
+    pub fn random(f: ObjetivoFn, esp: EspacoBusca) -> Self {
         let mut variaveis = Vec::new();
         for _ in 0..f.num_vars {
-            let x = rand::thread_rng().gen_range(espaco_busca.0, espaco_busca.1);
+            let x = rand::thread_rng().gen_range(esp.min, esp.max);
             variaveis.push(x);
         }
         let resultado = f.call(&variaveis);
@@ -32,14 +44,8 @@ impl Solucao {
         }
     }
 
-    // TODO eliminar isso
-    pub fn evaluate(f: ObjetivoFn, x: &Vec<f64>) -> Self {
-        let variaveis = x.clone();
-        Solucao::new(f, variaveis)
-    }
-
-    pub fn shake(&self, f: ObjetivoFn, min: f64, max: f64) -> Solucao {
-        let noise = (min.abs() + max.abs()) / 100.0;
+    pub fn shake(&self, f: ObjetivoFn, esp: EspacoBusca) -> Solucao {
+        let noise = (esp.min.abs() + esp.max.abs()) / 100.0;
 
         let mut variaveis = self.variaveis.clone();
         for elem in variaveis.iter_mut() {
@@ -48,7 +54,7 @@ impl Solucao {
                 loop {
                     let delta = rand::thread_rng().gen_range(-noise, noise);
                     let m = *elem + delta;
-                    if m <= max && m >= min {
+                    if m <= esp.max && m >= esp.min {
                         *elem = m;
                         break;
                     }

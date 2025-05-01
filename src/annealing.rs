@@ -6,16 +6,17 @@
 
 use rand::Rng;
 
-use crate::{ObjetivoFn, Solucao};
+use crate::objetivo::ObjetivoFn;
+use crate::solucao::{EspacoBusca, Solucao};
 
 const LN_E0: f64 = -0.22314355131; // mágico. Não toque
 
-fn temperatura_inicial(perturb: u32, f: ObjetivoFn, min: f64, max: f64) -> f64 {
+fn temperatura_inicial(perturb: u32, f: ObjetivoFn, esp: EspacoBusca) -> f64 {
     // Calcula ΔE+
     let mut res: f64 = 0.0;
-    let mut anterior = Solucao::random(f, (min, max));
+    let mut anterior = Solucao::random(f, esp);
     for _ in 0..perturb {
-        let atual = Solucao::random(f, (min, max));
+        let atual = Solucao::random(f, esp);
         res = res + anterior.resultado - atual.resultado;
         anterior = atual;
     }
@@ -30,16 +31,16 @@ fn metropolis(current: &Solucao, candidate: &Solucao, temperatura: f64) -> bool 
 
 const TEMP_FATOR: f64 = 0.9;
 
-pub fn simulated_annealing(f: ObjetivoFn, min: f64, max: f64) -> Solucao {
-    let mut s = Solucao::random(f, (min, max)); // solução atual
+pub fn simulated_annealing(f: ObjetivoFn, esp: EspacoBusca) -> Solucao {
+    let mut s = Solucao::random(f, esp); // solução atual
     let mut best_solution = s.clone(); // melhor solução encontrada
     let mut num_iters = 10000; // número de iterações por temperatura
-    let mut temperatura = temperatura_inicial(10, f, min, max);
+    let mut temperatura = temperatura_inicial(10, f, esp);
 
     // Uma temperatura muito baixa sinaliza o fim do algoritmo
     while temperatura >= 0.001 {
         for _ in 0..num_iters {
-            let p = s.shake(f, min, max);
+            let p = s.shake(f, esp);
             if p.resultado < best_solution.resultado {
                 best_solution = p.clone();
             }
