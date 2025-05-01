@@ -111,69 +111,43 @@ impl Vizinhanca {
 
         let size = solucao.variaveis.len();
 
-        if size == 2 {
-            // Faz um calculo usando circulos
+        variaveis.resize(size, 0.0);
+        // print!("-----------------\n");
 
-            variaveis.resize(2, 0.0);
-            // As funcoes trigonometricas de rust usam radianos
-            let x = solucao.variaveis[0];
-            let y = solucao.variaveis[1];
-
-            let rand: f64 = rand::thread_rng().gen_range(0.0, 2.0*PI);
-
-            variaveis[0] = x + self.vizinhanca_atual * rand.cos();
-            variaveis[1] = y + self.vizinhanca_atual * rand.sin();
-            // Verificacao de se não saiu do espaco de busca
-            while variaveis[0] > lim_max || variaveis[0] < lim_min {
-                print!("Variaveis fora do espaco busca!!! = {:?}\n", variaveis);
-                let rand: f64 = rand::thread_rng().gen_range(0.0, 2.0*PI);
-                variaveis[0] = x + self.vizinhanca_atual * rand.cos();
-            }
-            while variaveis[1] > lim_max || variaveis[1] < lim_min {
-                print!("Variaveis fora do espaco busca!!! = {:?}\n", variaveis);
-                let rand: f64 = rand::thread_rng().gen_range(0.0, 2.0*PI);
-                variaveis[1] = x + self.vizinhanca_atual * rand.cos();
-            }
-        } else {
-            variaveis.resize(size, 0.0);
-            print!("-----------------\n");
-
-            let mut na_caixa = false; // Logica muito complexa pra explicar no código sem nenhuma imagem. Mas é muito foda (fiquei legitimamente orgulhoso)
-            for elemen in variaveis.iter_mut(){
-                loop {
-                    let variacao = rand::thread_rng().gen_range(0.0, self.vizinhanca_atual);
-                    let neg_or_pos = rand::thread_rng().gen_range(-1.0,1.0);
-
-                    if neg_or_pos <= 0.0 {
-                        *elemen = *elemen + variacao;
-                        if espaco_busca.0 <= *elemen && *elemen <= espaco_busca.1 {
-                            if -self.vizinhanca_atual + self.passo_vizinhanca <= *elemen || *elemen >= self.vizinhanca_atual - self.passo_vizinhanca {na_caixa = true};
-                            print!("elemen neg{:?}\n", *elemen);
-                            break;
-                        }
-                    } else {
-                        *elemen = *elemen + self.vizinhanca_atual - variacao;
-                        if espaco_busca.0 <= *elemen && *elemen <= espaco_busca.1 {
-                            if -self.vizinhanca_atual + self.passo_vizinhanca <= *elemen || *elemen >= self.vizinhanca_atual - self.passo_vizinhanca {na_caixa = true};
-                            print!("elemen pos{:?}\n", *elemen);
-                            break;
-                        }
-                    }
-                }
-            }
-            if !na_caixa { // Pulo do gato.
-                let var = rand::thread_rng().gen_range(0,size);
-                let variacao = rand::thread_rng().gen_range(self.vizinhanca_atual - self.passo_vizinhanca, self.vizinhanca_atual);
+        let mut na_caixa = false; // Logica muito complexa pra explicar no código sem nenhuma imagem. Mas é muito foda (fiquei legitimamente orgulhoso)
+        for elemen in variaveis.iter_mut(){
+            loop {
+                let variacao = rand::thread_rng().gen_range(0.0, self.vizinhanca_atual);
                 let neg_or_pos = rand::thread_rng().gen_range(-1.0,1.0);
 
                 if neg_or_pos <= 0.0 {
-                    variaveis[var] = -variacao;
+                    *elemen = *elemen + variacao;
+                    if lim_min <= *elemen && *elemen <= lim_max {
+                        if -self.vizinhanca_atual + self.passo_vizinhanca <= *elemen || *elemen >= self.vizinhanca_atual - self.passo_vizinhanca {na_caixa = true};
+                        // print!("elemen neg{:?}\n", *elemen);
+                        break;
+                    }
                 } else {
-                    variaveis[var] = variacao;
+                    *elemen = *elemen + self.vizinhanca_atual - variacao;
+                    if lim_min <= *elemen && *elemen <= lim_max {
+                        if -self.vizinhanca_atual + self.passo_vizinhanca <= *elemen || *elemen >= self.vizinhanca_atual - self.passo_vizinhanca {na_caixa = true};
+                        // print!("elemen pos{:?}\n", *elemen);
+                        break;
+                    }
                 }
             }
         }
+        if !na_caixa { // Pulo do gato.
+            let var = rand::thread_rng().gen_range(0,size);
+            let variacao = rand::thread_rng().gen_range(self.vizinhanca_atual - self.passo_vizinhanca, self.vizinhanca_atual);
+            let neg_or_pos = rand::thread_rng().gen_range(-1.0,1.0);
 
+            if neg_or_pos <= 0.0 {
+                variaveis[var] = -variacao;
+            } else {
+                variaveis[var] = variacao;
+            }
+        }
         //print!("Gerando novos valores: {} {}\n", variaveis[0], variaveis[1]);
         
         let new_resultado= Solucao::evaluate(self.funcao_objetivo,&variaveis);
