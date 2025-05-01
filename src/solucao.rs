@@ -8,8 +8,8 @@ pub struct EspacoBusca {
 }
 
 impl EspacoBusca {
-    pub fn new(min: f64, max: f64) -> Self {
-        EspacoBusca { min, max }
+    pub fn new(x: f64) -> Self {
+        EspacoBusca { min: -x, max: x }
     }
 }
 

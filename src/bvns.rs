@@ -4,15 +4,17 @@ use crate::solucao::{EspacoBusca, Solucao};
 use rand::Rng;
 use std::time::Instant;
 
+// const P_ESPACO: f64 = 0.2;
+
 pub fn bvns(
-    solucao_inicial: &Solucao,
     vizinhanca_max: u64,
     mut tempo_max: u128,
-    espaco_busca: EspacoBusca,
+    esp: EspacoBusca,
     fo: ObjetivoFn,
 ) -> Solucao {
     let mut tempo: u128 = 0;
-    let tamanho_passo = 1.0; // é o raio que será variado entre cada vizinhanca
+    // É o raio que será variado entre cada vizinhanca
+    let tamanho_passo = 0.01;
 
     // transforma segundos em ns para fazer a contagem de tempo
     tempo_max = tempo_max * 36000000;
@@ -20,6 +22,7 @@ pub fn bvns(
     // Cria estrutura de vizinhancas
     let mut v: Vizinhanca = Vizinhanca::new(fo, vizinhanca_max, tamanho_passo);
 
+    let solucao_inicial = Solucao::random(fo, esp);
     let mut solucao_atual = solucao_inicial.clone();
 
     while tempo < tempo_max {
@@ -29,11 +32,11 @@ pub fn bvns(
 
         while !v.estruturas_totalmente_exploradas() {
             // gera solução candidata com variação Shake(sol_otima, vizinhanca)
-            let sol_candidata: Solucao = varia_solucao(&solucao_atual, espaco_busca, &v);
+            let sol_candidata: Solucao = varia_solucao(&solucao_atual, esp, &v);
 
             // faz uma busca local nessa solução candidata
             let sol_candidata_melhorada: Solucao =
-                intensifica_solucao(sol_candidata, espaco_busca, fo);
+                intensifica_solucao(sol_candidata, esp, fo);
 
             // faz a mudança de vizinhança
             // A funcao já se responsabiliza por alterar os valores das solucoes candidatas e atualizar a vizinnhanca
@@ -124,7 +127,7 @@ impl Vizinhanca {
                 *elemen += if neg_or_pos <= 0.0 {
                     variacao
                 } else {
-                    -variacao
+                    self.vizinhanca_atual - variacao
                 };
                 if espaco_busca.min <= *elemen && *elemen <= espaco_busca.max {
                     if -self.vizinhanca_atual + self.passo_vizinhanca <= *elemen

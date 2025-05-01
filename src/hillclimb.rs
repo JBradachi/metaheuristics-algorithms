@@ -1,6 +1,11 @@
 use crate::objetivo::ObjetivoFn;
 use crate::solucao::{EspacoBusca, Solucao};
 
+pub fn hillclimb_puro(obj: ObjetivoFn, esp: EspacoBusca) -> Solucao {
+    let sol = Solucao::random(obj, esp);
+    hillclimb(sol, esp, obj)
+}
+
 pub fn hillclimb(sol_candidata_sm: Solucao, espaco_busca: EspacoBusca, fo: ObjetivoFn) -> Solucao {
     // probabilidade de aceitar o ruído
     let mut sol_candidata = sol_candidata_sm.clone();
